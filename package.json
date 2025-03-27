@@ -1,6 +1,25 @@
 {
   "name": "crm-chatbot",
   "version": "1.0.0",
+<<<<<<< HEAD
+  "description": "CRM Chatbot Application",
+  "main": "src/backend/server.js",
+  "scripts": {
+    "start": "node src/backend/server.js",
+    "setup": "npm install && cd src/frontend && npm install",
+    "build": "cd src/frontend && npm run build"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^6.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0",
+    "bcryptjs": "^2.4.3",
+    "natural": "^6.2.0",
+    "multer": "^1.4.5-lts.1",
+    "pdfjs-dist": "^3.4.120"
+=======
   "description": "CRM Chatbot Application with NLP capabilities",
   "main": "src/backend/server.js",
   "scripts": {
@@ -52,5 +71,6 @@
     "nodemon": "^3.0.1",
     "supertest": "^6.3.4",
     "winston": "^3.8.2"
+>>>>>>> 09232ac7148e18043e8bcbb4b7a57e9bab3d842c
   }
 }

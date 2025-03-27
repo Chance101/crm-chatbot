@@ -1,8 +1,31 @@
+<<<<<<< HEAD
+FROM node:16-alpine
+=======
 FROM node:18-alpine as base
+>>>>>>> 09232ac7148e18043e8bcbb4b7a57e9bab3d842c
 
 # Create app directory
 WORKDIR /usr/src/app
 
+<<<<<<< HEAD
+# Copy package.json
+COPY package.json ./
+
+# Install dependencies
+RUN npm install
+
+# Create necessary directories
+RUN mkdir -p src/backend src/frontend src/uploads
+
+# Copy the rest of the application
+COPY . .
+
+# Expose port
+EXPOSE 5000
+
+# Start the application
+CMD ["npm", "start"]
+=======
 # Install dependencies for production
 COPY package*.json ./
 RUN npm ci --only=production
@@ -45,3 +68,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
 
 # Start the app
 CMD ["node", "src/backend/server.js"]
+>>>>>>> 09232ac7148e18043e8bcbb4b7a57e9bab3d842c
