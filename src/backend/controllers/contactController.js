@@ -1,17 +1,21 @@
 const Contact = require('../models/Contact');
+const { logger, createError } = require('../utils/logger');
 
 /**
  * Get all contacts for the logged-in user
  * @route GET /api/contacts
  * @access Private
  */
-const getContacts = async (req, res) => {
+const getContacts = async (req, res, next) => {
   try {
     const contacts = await Contact.find({ user: req.user._id });
     res.json(contacts);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Error fetching contacts', { 
+      error: error.message, 
+      userId: req.user._id 
+    });
+    next(createError('Failed to fetch contacts', 500));
   }
 };
 
@@ -20,7 +24,7 @@ const getContacts = async (req, res) => {
  * @route GET /api/contacts/:id
  * @access Private
  */
-const getContactById = async (req, res) => {
+const getContactById = async (req, res, next) => {
   try {
     const contact = await Contact.findOne({
       _id: req.params.id,
@@ -30,11 +34,15 @@ const getContactById = async (req, res) => {
     if (contact) {
       res.json(contact);
     } else {
-      res.status(404).json({ message: 'Contact not found' });
+      next(createError('Contact not found', 404));
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Error fetching contact by ID', { 
+      error: error.message, 
+      contactId: req.params.id,
+      userId: req.user._id 
+    });
+    next(createError('Failed to fetch contact', 500));
   }
 };
 
@@ -43,7 +51,7 @@ const getContactById = async (req, res) => {
  * @route POST /api/contacts
  * @access Private
  */
-const createContact = async (req, res) => {
+const createContact = async (req, res, next) => {
   try {
     const contact = new Contact({
       ...req.body,
@@ -53,8 +61,34 @@ const createContact = async (req, res) => {
     const createdContact = await contact.save();
     res.status(201).json(createdContact);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    // Check if this is a validation error
+    if (error.name === 'ValidationError') {
+      // Return a 400 Bad Request status with validation details
+      logger.warn('Contact validation error', {
+        error: error.message,
+        validationErrors: Object.keys(error.errors).map(field => ({
+          field,
+          message: error.errors[field].message
+        })),
+        userId: req.user._id
+      });
+      
+      return res.status(400).json({
+        message: 'Validation error: Contact could not be created',
+        errors: Object.keys(error.errors).reduce((acc, field) => {
+          acc[field] = error.errors[field].message;
+          return acc;
+        }, {})
+      });
+    }
+    
+    // Otherwise it's a server error
+    logger.error('Error creating contact', { 
+      error: error.message, 
+      stack: error.stack,
+      userId: req.user._id 
+    });
+    next(createError('Failed to create contact', 500));
   }
 };
 
@@ -63,7 +97,7 @@ const createContact = async (req, res) => {
  * @route PUT /api/contacts/:id
  * @access Private
  */
-const updateContact = async (req, res) => {
+const updateContact = async (req, res, next) => {
   try {
     const contact = await Contact.findOne({
       _id: req.params.id,
@@ -79,11 +113,37 @@ const updateContact = async (req, res) => {
       const updatedContact = await contact.save();
       res.json(updatedContact);
     } else {
-      res.status(404).json({ message: 'Contact not found' });
+      next(createError('Contact not found', 404));
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    // Check if this is a validation error
+    if (error.name === 'ValidationError') {
+      // Return a 400 Bad Request status with validation details
+      logger.warn('Contact validation error during update', {
+        error: error.message,
+        validationErrors: Object.keys(error.errors).map(field => ({
+          field,
+          message: error.errors[field].message
+        })),
+        contactId: req.params.id,
+        userId: req.user._id
+      });
+      
+      return res.status(400).json({
+        message: 'Validation error: Contact could not be updated',
+        errors: Object.keys(error.errors).reduce((acc, field) => {
+          acc[field] = error.errors[field].message;
+          return acc;
+        }, {})
+      });
+    }
+    
+    logger.error('Error updating contact', { 
+      error: error.message, 
+      contactId: req.params.id,
+      userId: req.user._id 
+    });
+    next(createError('Failed to update contact', 500));
   }
 };
 
@@ -92,22 +152,25 @@ const updateContact = async (req, res) => {
  * @route DELETE /api/contacts/:id
  * @access Private
  */
-const deleteContact = async (req, res) => {
+const deleteContact = async (req, res, next) => {
   try {
-    const contact = await Contact.findOne({
+    const contact = await Contact.findOneAndDelete({
       _id: req.params.id,
       user: req.user._id
     });
 
     if (contact) {
-      await contact.remove();
       res.json({ message: 'Contact removed' });
     } else {
-      res.status(404).json({ message: 'Contact not found' });
+      next(createError('Contact not found', 404));
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Error deleting contact', { 
+      error: error.message, 
+      contactId: req.params.id,
+      userId: req.user._id 
+    });
+    next(createError('Failed to delete contact', 500));
   }
 };
 
@@ -116,7 +179,7 @@ const deleteContact = async (req, res) => {
  * @route POST /api/contacts/:id/communications
  * @access Private
  */
-const addCommunication = async (req, res) => {
+const addCommunication = async (req, res, next) => {
   try {
     const contact = await Contact.findOne({
       _id: req.params.id,
@@ -135,11 +198,26 @@ const addCommunication = async (req, res) => {
       const updatedContact = await contact.save();
       res.status(201).json(updatedContact);
     } else {
-      res.status(404).json({ message: 'Contact not found' });
+      next(createError('Contact not found', 404));
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    // Check if this is a validation error
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: 'Validation error: Communication could not be added',
+        errors: Object.keys(error.errors).reduce((acc, field) => {
+          acc[field] = error.errors[field].message;
+          return acc;
+        }, {})
+      });
+    }
+    
+    logger.error('Error adding communication', { 
+      error: error.message, 
+      contactId: req.params.id,
+      userId: req.user._id 
+    });
+    next(createError('Failed to add communication', 500));
   }
 };
 
@@ -148,7 +226,7 @@ const addCommunication = async (req, res) => {
  * @route GET /api/contacts/search
  * @access Private
  */
-const searchContacts = async (req, res) => {
+const searchContacts = async (req, res, next) => {
   try {
     const { query, team, role, temperature, company, lastContactDays } = req.query;
     const searchQuery = { user: req.user._id };
@@ -181,10 +259,21 @@ const searchContacts = async (req, res) => {
     }
 
     const contacts = await Contact.find(searchQuery);
+    
+    logger.info('Contact search performed', {
+      userId: req.user._id,
+      criteria: req.query,
+      resultCount: contacts.length
+    });
+    
     res.json(contacts);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    logger.error('Error searching contacts', { 
+      error: error.message, 
+      searchParams: req.query,
+      userId: req.user._id 
+    });
+    next(createError('Failed to search contacts', 500));
   }
 };
 

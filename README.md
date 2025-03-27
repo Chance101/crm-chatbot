@@ -1,230 +1,203 @@
-# CRM Chatbot Application
+# CRM Chatbot
 
-A modern CRM application with natural language chatbot interface for managing contacts and relationships.
+A modern CRM application with intelligent AI chatbot capabilities for managing contacts, reminders, and generating insights.
 
 ## Features
 
-- **Smart Chatbot Interface**: Natural language interface for interacting with your CRM data
-- **Contact Management**: Comprehensive database for storing detailed contact information
-- **PDF Parsing**: Extract contact information from uploaded PDF documents
-- **Reminders**: Set and manage follow-up reminders for your contacts
-- **Analytics**: Visualize your contact data with charts and graphs
-- **Engagement Advice**: Get personalized advice for engaging with specific contacts
-- **User Authentication**: Secure access with JWT-based authentication
+- **AI-Powered Chatbot**: Natural language interface for managing contacts and reminders
+- **Contact Management**: Comprehensive contact tracking with communication history
+- **Reminders System**: Never miss important follow-ups with intelligent scheduling
+- **Data Visualization**: Generate insightful reports on your contacts and activities
+- **PDF Processing**: Extract contact information from business cards and documents
+- **Responsive UI**: Works seamlessly on desktop and mobile devices
+- **Dark/Light Mode**: Choose your preferred theme for comfortable use
 
 ## Tech Stack
 
-- **Backend**: Node.js with Express
-- **Database**: MongoDB (configurable)
-- **Frontend**: React with Styled Components
+- **Frontend**: React, styled-components, Chart.js, React Router
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT-based auth with refresh tokens
+- **AI Integration**: Claude API for natural language processing
 - **PDF Processing**: PDF.js for document parsing
-- **NLP**: Claude AI integration with Natural.js fallback for natural language processing
-- **Authentication**: JWT-based authentication system
-- **Charts**: Chart.js for data visualization
+- **Visualization**: Chart.js for data visualization
+- **Testing**: Jest, React Testing Library
+- **Deployment**: Docker, Docker Compose
 
-## Prerequisites
+## Getting Started
 
-- Node.js (v14+)
-- npm or yarn
-- MongoDB (local or Atlas)
+### Prerequisites
 
-## Installation and Setup
+- Node.js (v18+)
+- MongoDB (v6+)
+- Claude API key (for AI functionality)
 
-### Clone the Repository
+### Environment Setup
 
+1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/yourusername/crm-chatbot.git
 cd crm-chatbot
 ```
 
-### Set Up Environment Variables
-
-```bash
-cp .env.example .env
+2. Create a `.env` file with the following variables:
 ```
-
-Edit the `.env` file with your configuration:
-
-```
-# Server Configuration
-PORT=5000
 NODE_ENV=development
-
-# MongoDB Connection
+PORT=5000
 MONGODB_URI=mongodb://localhost:27017/crm-chatbot
-
-# JWT Authentication
-JWT_SECRET=your_jwt_secret_key_here
+JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=7d
-
-# Rate Limiting
+REFRESH_TOKEN_EXPIRES_IN=30d
+CLAUDE_API_KEY=your_claude_api_key
 RATE_LIMIT_WINDOW=15
 RATE_LIMIT_MAX=100
-
-# Claude AI Integration
-CLAUDE_API_KEY=your_claude_api_key_here
 ```
 
-### Install Dependencies
-
-Install backend dependencies:
-
-```bash
-npm install
-```
-
-Install frontend dependencies:
-
-```bash
-cd src/frontend
-npm install
-cd ../..
-```
-
-Or use the setup script to install both:
-
+3. Install dependencies:
 ```bash
 npm run setup
 ```
 
-### Start Development Servers
+### Running Locally
 
+1. Start the development server:
 ```bash
 npm run dev
 ```
 
-This will start both the backend server (on port 5000) and the frontend development server (on port 3000).
+This will start both the backend server and the React development server concurrently.
 
-## Usage Guide
+2. Access the application:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000
 
-### Authentication
+### Testing
 
-1. Register a new account or login with existing credentials
-2. The auth token will be stored in localStorage for persistent sessions
+Run the test suite:
 
-### Using the Chatbot
+```bash
+# Run all tests
+npm run test:all
 
-The chatbot interface allows natural language interactions with your CRM. Example commands:
+# Run only backend tests
+npm run test
 
-- "Find contacts in marketing team"
-- "Set a reminder to contact John Smith in 3 days"
-- "Show me contacts I haven't reached out to in 30 days"
-- "Generate a report on contact temperature"
-- "Give me talking points for Sarah Johnson"
+# Run only frontend tests
+npm run test:frontend
 
-### Contact Management
-
-- Add new contacts manually through the interface
-- Upload PDF documents (like resumes or business cards) to extract contact information
-- View and edit contact details
-- Log communications with contacts
-
-### Reminders
-
-- Set reminders for follow-ups
-- Receive notifications for upcoming reminders
-- Mark reminders as completed
-
-### Analytics and Reports
-
-- View contact distribution by temperature, team, etc.
-- Generate custom reports through the chatbot interface
+# Run test coverage report
+npm run test:coverage
+```
 
 ## Deployment
 
-### Production Build
-
-Create a production build of the frontend and start the server:
-
-```bash
-npm run build
-npm start
-```
-
 ### Docker Deployment
 
-Build and run the Docker container:
-
+1. Build and run with Docker Compose:
 ```bash
-docker build -t crm-chatbot .
-docker run -p 5000:5000 crm-chatbot
+docker-compose up -d
 ```
 
-Or use Docker Compose:
-
+2. For production builds:
 ```bash
-docker-compose up
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
-### Deployment Platforms
+### Manual Deployment
 
-This application can be deployed to:
+1. Build the frontend:
+```bash
+npm run build
+```
 
-- **Heroku**: Procfile included for easy deployment
-- **AWS/GCP/Azure**: Use Docker for containerized deployment
-- **DigitalOcean**: Use Docker or direct Node.js deployment
+2. Start the production server:
+```bash
+NODE_ENV=production npm start
+```
+
+## Configuration Options
+
+### Authentication
+
+- `JWT_SECRET`: Secret key for signing JWTs
+- `JWT_EXPIRES_IN`: Token expiration time (default: 7d)
+- `REFRESH_TOKEN_EXPIRES_IN`: Refresh token lifetime (default: 30d)
+
+### Rate Limiting
+
+- `RATE_LIMIT_WINDOW`: Time window for rate limiting in minutes
+- `RATE_LIMIT_MAX`: Maximum number of requests per window
+
+### Logging
+
+- `LOG_LEVEL`: Logging level (error, warn, info, debug)
+
+## Performance Monitoring
+
+The application includes comprehensive performance monitoring:
+
+- API response time tracking
+- Database query performance logging
+- Memory usage monitoring
+- MongoDB connection monitoring
+- Structured logging for all operations
+
+Access logs in the `/logs` directory when running locally.
 
 ## Project Structure
 
 ```
-crm-chatbot/
-├── src/                      # Source code
-│   ├── backend/              # Backend Node.js application
-│   │   ├── config/           # Configuration files
-│   │   ├── controllers/      # Route controllers
-│   │   ├── middleware/       # Express middleware
-│   │   ├── models/           # Mongoose models
-│   │   ├── routes/           # API routes
-│   │   ├── services/         # Business logic
-│   │   ├── utils/            # Utility functions
-│   │   └── server.js         # Express server entry point
-│   ├── frontend/             # React frontend application
-│   │   ├── public/           # Static files
-│   │   └── src/              # React source code
-│   │       ├── components/   # React components
-│   │       ├── contexts/     # React contexts
-│   │       ├── hooks/        # Custom React hooks
-│   │       ├── pages/        # Page components
-│   │       ├── services/     # API services
-│   │       ├── styles/       # Global styles
-│   │       ├── App.js        # Main App component
-│   │       └── index.js      # React entry point
-│   └── uploads/              # Uploaded files (PDFs, etc.)
-├── .env.example              # Example environment variables
-├── .gitignore                # Git ignore file
-├── docker-compose.yml        # Docker Compose configuration
-├── Dockerfile                # Docker configuration
-├── package.json              # Project dependencies
-└── README.md                 # Project documentation
+.
+├── docs/                    # Documentation files
+├── public/                  # Static assets
+├── src/                     # Source files
+│   ├── backend/             # Node.js/Express backend
+│   │   ├── config/          # Configuration files
+│   │   ├── controllers/     # Route controllers
+│   │   ├── middleware/      # Express middleware
+│   │   ├── models/          # Mongoose models
+│   │   ├── routes/          # API routes
+│   │   ├── services/        # Business logic services
+│   │   ├── utils/           # Utility functions
+│   │   └── server.js        # Express server setup
+│   ├── frontend/            # React frontend
+│   │   ├── public/          # Public assets
+│   │   └── src/             # React source files
+│   │       ├── components/  # React components
+│   │       ├── contexts/    # React contexts
+│   │       ├── hooks/       # Custom hooks
+│   │       ├── pages/       # Page components
+│   │       ├── services/    # API services
+│   │       └── styles/      # Global styles
+│   └── scripts/             # Utility scripts
+├── tests/                   # Test files
+├── .env.example             # Example environment variables
+├── docker-compose.yml       # Docker Compose configuration
+├── Dockerfile               # Docker configuration
+└── package.json             # NPM package configuration
 ```
 
-## Claude AI Integration
+## API Documentation
 
-This application integrates with Claude AI for advanced natural language processing capabilities. Key benefits include:
+See [API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) for detailed API documentation.
 
-- Improved intent recognition and entity extraction
-- Enhanced engagement advice for contacts
-- More accurate interpretation of user queries
-- Fallback to built-in NLP when necessary
+## User Guide
 
-To enable Claude AI integration:
-
-1. Get an API key from Anthropic (Claude AI provider)
-2. Add your API key to the `.env` file: `CLAUDE_API_KEY=your_key_here`
-3. The chatbot will automatically use Claude when available and fall back to the local NLP when needed
-
-## Future Enhancements
-
-- **Expanded AI Capabilities**: Add more Claude-powered features
-- **Mobile App**: Develop companion mobile application
-- **Email Integration**: Connect with email services for automatic logging
-- **Calendar Integration**: Sync with Google Calendar or Outlook
-- **Voice Commands**: Add voice recognition for hands-free operation
-
-## License
-
-MIT
+See [USER_GUIDE.md](docs/USER_GUIDE.md) for the user manual.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Claude AI for powering the chatbot functionality
+- The MERN stack community for excellent tools and resources
